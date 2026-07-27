@@ -24,6 +24,24 @@ export const formatDateTime = (date: string | Date) => {
   });
 };
 
+/** Resolve API-hosted media paths (e.g. /uploads/...) against the backend origin. */
+export const mediaUrl = (path?: string | null) => {
+  if (!path) return '';
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://') ||
+    path.startsWith('blob:') ||
+    path.startsWith('data:')
+  ) {
+    return path;
+  }
+
+  const apiBase = import.meta.env.VITE_API_URL || '/api';
+  const origin = apiBase.replace(/\/api\/?$/, '');
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return origin ? `${origin}${normalized}` : normalized;
+};
+
 export const getErrorMessage = (error: unknown): string => {
   if (error && typeof error === 'object' && 'response' in error) {
     const axiosError = error as { response?: { data?: { message?: string } } };

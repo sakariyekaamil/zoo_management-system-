@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const isVercel = Boolean(process.env.VERCEL);
+
 export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -11,5 +13,6 @@ export const config = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
-  uploadDir: process.env.UPLOAD_DIR || './uploads',
+  // Vercel filesystem is ephemeral; /tmp is writable per invocation.
+  uploadDir: process.env.UPLOAD_DIR || (isVercel ? '/tmp/uploads' : './uploads'),
 };

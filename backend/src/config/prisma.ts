@@ -8,7 +8,7 @@ const basePrisma =
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
   globalForPrisma.prisma = basePrisma;
 }
 

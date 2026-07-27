@@ -14,7 +14,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { reportsApi, settingsApi } from '../../services/resources';
 import { authApi } from '../../services/resources';
 import { REPORT_TYPES } from '../../constants';
-import { downloadCSV, formatCurrency, formatDate, getErrorMessage } from '../../utils';
+import { downloadCSV, formatCurrency, formatDate, getErrorMessage, mediaUrl } from '../../utils';
 import { useAuth } from '../../contexts/AuthContext';
 
 type ReportRow = Record<string, unknown>;
@@ -426,7 +426,7 @@ export const SettingsPage = () => {
           <Card>
             <h3 className="font-semibold mb-4">Logo Upload</h3>
             {settings?.logo && (
-              <img src={settings.logo} alt="Zoo Logo" className="w-24 h-24 object-contain mb-4 rounded-lg border" />
+              <img src={mediaUrl(settings.logo)} alt="Zoo Logo" className="w-24 h-24 object-contain mb-4 rounded-lg border" />
             )}
             <input
               type="file"

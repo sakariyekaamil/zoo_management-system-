@@ -1,48 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
-import path from 'path';
+import app from './app';
 import { config } from './config';
-import routes from './routes';
-import { errorHandler, notFound } from './middleware/errorHandler';
-import logger from './utils/logger';
 import { ensureDatabaseConnection } from './config/prisma';
-
-const app = express();
-
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(cors({
-  origin: [config.frontendUrl, 'http://127.0.0.1:5173', 'http://localhost:5173'],
-  credentials: true,
-}));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use('/uploads', express.static(path.resolve(config.uploadDir)));
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: { success: false, message: 'Too many requests, please try again later' },
-});
-app.use('/api', limiter);
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { success: false, message: 'Too many login attempts' },
-});
-app.use('/api/auth/login', authLimiter);
-
-app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'WARRAN-CADDE Zoo API is running' });
-});
-
-app.use('/api', routes);
-app.use(notFound);
-app.use(errorHandler);
+import logger from './utils/logger';
 
 const start = async () => {
   try {
@@ -59,6 +18,9 @@ const start = async () => {
   });
 };
 
-start();
+// Local / traditional hosting only — Vercel uses api/index.ts as the serverless entry.
+if (!process.env.VERCEL) {
+  start();
+}
 
 export default app;

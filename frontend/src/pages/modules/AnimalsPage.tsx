@@ -19,7 +19,7 @@ import { Card } from '../../components/ui/Card';
 import { animalsApi, speciesApi, enclosuresApi } from '../../services/resources';
 import { HEALTH_STATUS_COLORS } from '../../constants';
 import { Animal } from '../../types';
-import { formatDate, getErrorMessage } from '../../utils';
+import { formatDate, getErrorMessage, mediaUrl } from '../../utils';
 
 type AnimalDraft = {
   key: string;
@@ -326,7 +326,7 @@ export const AnimalsPage = () => {
             >
               <div className="relative h-44 overflow-hidden bg-gray-100 dark:bg-gray-800">
                 {group.coverPhoto ? (
-                  <img src={group.coverPhoto} alt={group.speciesName} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                  <img src={mediaUrl(group.coverPhoto)} alt={group.speciesName} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-gray-400">No photo</div>
                 )}
@@ -533,7 +533,7 @@ export const AnimalsPage = () => {
                 <Card key={animal.id} className="space-y-3 overflow-hidden !p-0">
                   <div className="h-40 bg-gray-100 dark:bg-gray-800">
                     {animal.photo ? (
-                      <img src={animal.photo} alt={animal.name} className="h-full w-full object-cover" />
+                      <img src={mediaUrl(animal.photo)} alt={animal.name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center text-sm text-gray-400">No photo</div>
                     )}
@@ -632,7 +632,7 @@ export const AnimalsPage = () => {
                 />
               </>
             )}
-            {editing.photo && <img src={editing.photo} alt={editing.name} className="h-24 w-24 rounded-xl object-cover" />}
+            {editing.photo && <img src={mediaUrl(editing.photo)} alt={editing.name} className="h-24 w-24 rounded-xl object-cover" />}
             <Input label="Replace Photo" type="file" accept="image/*,.jfif" onChange={(e) => setEditPhoto(e.target.files?.[0])} />
             <Textarea name="notes" label="Notes" rows={3} defaultValue={editing.notes || ''} />
             <Button type="submit" loading={saving} className="w-full">Save Changes</Button>

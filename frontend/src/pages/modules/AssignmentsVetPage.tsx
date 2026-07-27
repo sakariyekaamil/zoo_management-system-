@@ -12,7 +12,7 @@ import { Button } from '../../components/ui/Button';
 import {
   assignmentsApi, animalsApi, employeesApi, veterinaryApi, vaccinationsApi,
 } from '../../services/resources';
-import { formatDate, getErrorMessage } from '../../utils';
+import { formatDate, getErrorMessage, mediaUrl } from '../../utils';
 
 const schema = z.object({
   animalId: z.string().uuid(),
@@ -125,7 +125,7 @@ const CertificateCell = ({ record }: { record: VetRecord }) => {
       {record.certificateUrl && (
         <>
           <a
-            href={record.certificateUrl}
+            href={mediaUrl(record.certificateUrl)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary-700 hover:underline dark:text-primary-300"
@@ -133,7 +133,7 @@ const CertificateCell = ({ record }: { record: VetRecord }) => {
             View
           </a>
           <a
-            href={record.certificateUrl}
+            href={mediaUrl(record.certificateUrl)}
             download
             className="text-primary-700 hover:underline dark:text-primary-300"
           >
