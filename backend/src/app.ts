@@ -12,24 +12,36 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-const corsOrigins = [
-  config.frontendUrl,
-  'https://zoo-management-system-oh9g.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:5174'
-].filter(Boolean);
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/$/, '');
+
+const isAllowedOrigin = (origin?: string) => {
+  if (!origin) return true;
+  const normalized = normalizeOrigin(origin);
+  if (config.corsOrigins.includes(normalized)) return true;
+  // Vercel production + preview URLs for this project
+  try {
+    const host = new URL(normalized).hostname;
+    if (host.endsWith('.vercel.app')) return true;
+  } catch {
+    return false;
+  }
+  return false;
+};
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || corsOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
       callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   })
 );
 app.use(express.json({ limit: '4mb' }));
