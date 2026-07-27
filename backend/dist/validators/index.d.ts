@@ -1,0 +1,25 @@
+export declare const loginValidator: import("express-validator").ValidationChain[];
+export declare const refreshValidator: import("express-validator").ValidationChain[];
+export declare const forgotPasswordValidator: import("express-validator").ValidationChain[];
+export declare const resetPasswordValidator: import("express-validator").ValidationChain[];
+export declare const changePasswordValidator: import("express-validator").ValidationChain[];
+export declare const userValidator: import("express-validator").ValidationChain[];
+export declare const animalValidator: import("express-validator").ValidationChain[];
+export declare const speciesValidator: import("express-validator").ValidationChain[];
+export declare const enclosureValidator: import("express-validator").ValidationChain[];
+export declare const employeeValidator: import("express-validator").ValidationChain[];
+export declare const visitorValidator: import("express-validator").ValidationChain[];
+export declare const ticketTypeValidator: import("express-validator").ValidationChain[];
+export declare const ticketValidator: import("express-validator").ValidationChain[];
+export declare const paymentValidator: import("express-validator").ValidationChain[];
+export declare const supplierValidator: import("express-validator").ValidationChain[];
+export declare const foodInventoryValidator: import("express-validator").ValidationChain[];
+export declare const feedingScheduleValidator: import("express-validator").ValidationChain[];
+export declare const veterinaryValidator: import("express-validator").ValidationChain[];
+export declare const vaccinationValidator: import("express-validator").ValidationChain[];
+export declare const expenseValidator: import("express-validator").ValidationChain[];
+export declare const maintenanceValidator: import("express-validator").ValidationChain[];
+export declare const transferValidator: import("express-validator").ValidationChain[];
+export declare const assignmentValidator: import("express-validator").ValidationChain[];
+export declare const foodPurchaseValidator: import("express-validator").ValidationChain[];
+//# sourceMappingURL=index.d.ts.map

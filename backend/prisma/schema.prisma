@@ -1,0 +1,514 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  VETERINARIAN
+  KEEPER
+  CASHIER
+  GUIDE
+}
+
+enum HealthStatus {
+  HEALTHY
+  SICK
+  RECOVERING
+  CRITICAL
+  DECEASED
+}
+
+enum AnimalOrigin {
+  BIRTH
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum MaintenanceStatus {
+  OPERATIONAL
+  UNDER_MAINTENANCE
+  CLOSED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+  CANCELLED
+  EXPIRED
+}
+
+enum AssignmentRole {
+  KEEPER
+  VETERINARIAN
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum ExpenseCategory {
+  SALARY
+  FOOD
+  MAINTENANCE
+  UTILITIES
+  MEDICAL
+  EQUIPMENT
+  MARKETING
+  OTHER
+}
+
+enum MaintenanceRecordStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum FeedingFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  firstName        String    @map("first_name")
+  lastName         String    @map("last_name")
+  role             UserRole  @default(GUIDE)
+  isActive         Boolean   @default(true) @map("is_active")
+  refreshToken     String?   @map("refresh_token")
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  avatar           String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  employee         Employee?
+  auditLogs        AuditLog[]
+  expenses         Expense[]
+  animalTransfers  AnimalTransfer[]
+  veterinaryRecords VeterinaryRecord[] @relation("VeterinarianRecords")
+
+  @@map("users")
+}
+
+model Species {
+  id                  String   @id @default(uuid())
+  name                String   @unique
+  scientificName      String?  @map("scientific_name")
+  habitat             String?
+  conservationStatus  String?  @map("conservation_status")
+  description         String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  animals Animal[]
+
+  @@map("species")
+}
+
+model Enclosure {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  location          String?
+  capacity          Int               @default(1)
+  temperature       Float?
+  maintenanceStatus MaintenanceStatus @default(OPERATIONAL) @map("maintenance_status")
+  description       String?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  animals           Animal[]
+  maintenance       Maintenance[]
+  transfersFrom     AnimalTransfer[]  @relation("FromEnclosure")
+  transfersTo       AnimalTransfer[]  @relation("ToEnclosure")
+
+  @@map("enclosures")
+}
+
+model Animal {
+  id            String       @id @default(uuid())
+  name          String
+  speciesId     String       @map("species_id")
+  enclosureId   String       @map("enclosure_id")
+  gender        Gender       @default(UNKNOWN)
+  dateOfBirth   DateTime?    @map("date_of_birth")
+  healthStatus  HealthStatus @default(HEALTHY) @map("health_status")
+  quantity      Int          @default(1)
+  origin        AnimalOrigin @default(BIRTH)
+  originPlace   String?      @map("origin_place")
+  originDescription String?  @map("origin_description")
+  weight        Float?
+  photo         String?
+  arrivalDate   DateTime     @default(now()) @map("arrival_date")
+  notes         String?
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  species           Species            @relation(fields: [speciesId], references: [id], onDelete: Restrict)
+  enclosure         Enclosure          @relation(fields: [enclosureId], references: [id], onDelete: Restrict)
+  assignments       AnimalAssignment[]
+  veterinaryRecords VeterinaryRecord[]
+  vaccinations      Vaccination[]
+  feedingSchedules  FeedingSchedule[]
+  transfers         AnimalTransfer[]
+
+  @@index([speciesId])
+  @@index([enclosureId])
+  @@index([healthStatus])
+  @@map("animals")
+}
+
+model Employee {
+  id        String   @id @default(uuid())
+  userId    String?  @unique @map("user_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @unique
+  phone     String?
+  position  String
+  salary    Float    @default(0)
+  hireDate  DateTime @default(now()) @map("hire_date")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignments       AnimalAssignment[]
+  feedingSchedules  FeedingSchedule[]
+  expenses          Expense[]
+
+  @@map("employees")
+}
+
+model AnimalAssignment {
+  id           String         @id @default(uuid())
+  animalId     String         @map("animal_id")
+  employeeId   String         @map("employee_id")
+  role         AssignmentRole
+  assignedDate DateTime       @default(now()) @map("assigned_date")
+  endDate      DateTime?      @map("end_date")
+  isActive     Boolean        @default(true) @map("is_active")
+  notes        String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  animal   Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@index([employeeId])
+  @@map("animal_assignments")
+}
+
+model VeterinaryRecord {
+  id             String    @id @default(uuid())
+  animalId       String    @map("animal_id")
+  veterinarianId String?   @map("veterinarian_id")
+  diagnosis      String
+  treatment      String?
+  medicine       String?
+  certificateUrl String?   @map("certificate_url")
+  visitDate      DateTime  @default(now()) @map("visit_date")
+  nextVisit      DateTime? @map("next_visit")
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  animal       Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  veterinarian User?  @relation("VeterinarianRecords", fields: [veterinarianId], references: [id], onDelete: SetNull)
+
+  @@index([animalId])
+  @@map("veterinary_records")
+}
+
+model Vaccination {
+  id               String   @id @default(uuid())
+  animalId         String   @map("animal_id")
+  vaccineName      String   @map("vaccine_name")
+  administeredDate DateTime @default(now()) @map("administered_date")
+  expiryDate       DateTime? @map("expiry_date")
+  nextDueDate      DateTime? @map("next_due_date")
+  administeredBy   String?  @map("administered_by")
+  notes            String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@index([nextDueDate])
+  @@map("vaccinations")
+}
+
+model FoodInventory {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  category      String
+  quantity      Float    @default(0)
+  unit          String   @default("kg")
+  minStockLevel Float    @default(10) @map("min_stock_level")
+  supplierId    String?  @map("supplier_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  supplier         Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  feedingSchedules FeedingSchedule[]
+  foodPurchases    FoodPurchase[]
+
+  @@map("food_inventory")
+}
+
+model FeedingSchedule {
+  id            String           @id @default(uuid())
+  animalId      String           @map("animal_id")
+  foodId        String           @map("food_id")
+  keeperId      String?          @map("keeper_id")
+  scheduledTime DateTime         @map("scheduled_time")
+  frequency     FeedingFrequency @default(DAILY)
+  quantity      Float
+  isCompleted   Boolean          @default(false) @map("is_completed")
+  completedAt   DateTime?        @map("completed_at")
+  notes         String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  animal Animal        @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  food   FoodInventory @relation(fields: [foodId], references: [id], onDelete: Restrict)
+  keeper Employee?     @relation(fields: [keeperId], references: [id], onDelete: SetNull)
+
+  @@index([animalId])
+  @@index([scheduledTime])
+  @@map("feeding_schedules")
+}
+
+model Visitor {
+  id        String   @id @default(uuid())
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tickets Ticket[]
+
+  @@map("visitors")
+}
+
+model TicketType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  price       Float
+  cardStyle   String   @default("STANDARD") @map("card_style")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tickets Ticket[]
+
+  @@map("ticket_types")
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  visitorId    String       @map("visitor_id")
+  ticketTypeId String       @map("ticket_type_id")
+  ticketNumber String       @unique @map("ticket_number")
+  visitDate    DateTime     @default(now()) @map("visit_date")
+  quantity     Int          @default(1)
+  totalAmount  Float        @map("total_amount")
+  status       TicketStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  visitor    Visitor    @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  ticketType TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Restrict)
+  payments   Payment[]
+
+  @@index([visitorId])
+  @@index([visitDate])
+  @@map("tickets")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  ticketId      String        @map("ticket_id")
+  amount        Float
+  discount      Float         @default(0)
+  paymentMethod PaymentMethod @map("payment_method")
+  transactionId String?       @map("transaction_id")
+  paymentDate   DateTime      @default(now()) @map("payment_date")
+  status        PaymentStatus @default(COMPLETED)
+  notes         String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+model Supplier {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  contactPerson String?  @map("contact_person")
+  email         String?
+  phone         String?
+  address       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  foodInventory FoodInventory[]
+  foodPurchases FoodPurchase[]
+
+  @@map("suppliers")
+}
+
+model FoodPurchase {
+  id           String   @id @default(uuid())
+  foodId       String   @map("food_id")
+  supplierId   String   @map("supplier_id")
+  quantity     Float
+  unitPrice    Float    @map("unit_price")
+  totalCost    Float    @map("total_cost")
+  purchaseDate DateTime @default(now()) @map("purchase_date")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  food     FoodInventory @relation(fields: [foodId], references: [id], onDelete: Restrict)
+  supplier Supplier      @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+
+  @@index([foodId])
+  @@index([supplierId])
+  @@map("food_purchases")
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  category    ExpenseCategory
+  description String
+  amount      Float
+  bonus       Float           @default(0)
+  employeeId  String?         @map("employee_id")
+  expenseDate DateTime        @default(now()) @map("expense_date")
+  recordedBy  String?         @map("recorded_by")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  recorder User? @relation(fields: [recordedBy], references: [id], onDelete: SetNull)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+
+  @@index([expenseDate])
+  @@index([category])
+  @@index([employeeId])
+  @@map("expenses")
+}
+
+model Maintenance {
+  id            String                  @id @default(uuid())
+  enclosureId   String                  @map("enclosure_id")
+  description   String
+  scheduledDate DateTime                @map("scheduled_date")
+  completedDate DateTime?               @map("completed_date")
+  cost          Float                   @default(0)
+  status        MaintenanceRecordStatus @default(SCHEDULED)
+  notes         String?
+  createdAt     DateTime                @default(now()) @map("created_at")
+  updatedAt     DateTime                @updatedAt @map("updated_at")
+
+  enclosure Enclosure @relation(fields: [enclosureId], references: [id], onDelete: Cascade)
+
+  @@index([enclosureId])
+  @@index([scheduledDate])
+  @@map("maintenance")
+}
+
+model AnimalTransfer {
+  id              String   @id @default(uuid())
+  animalId        String   @map("animal_id")
+  fromEnclosureId String   @map("from_enclosure_id")
+  toEnclosureId   String   @map("to_enclosure_id")
+  transferDate    DateTime @default(now()) @map("transfer_date")
+  reason          String
+  transferredBy   String?  @map("transferred_by")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  animal        Animal    @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  fromEnclosure Enclosure @relation("FromEnclosure", fields: [fromEnclosureId], references: [id], onDelete: Restrict)
+  toEnclosure   Enclosure @relation("ToEnclosure", fields: [toEnclosureId], references: [id], onDelete: Restrict)
+  transferrer   User?     @relation(fields: [transferredBy], references: [id], onDelete: SetNull)
+
+  @@index([animalId])
+  @@map("animal_transfers")
+}
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  userId    String?     @map("user_id")
+  action    AuditAction
+  entity    String
+  entityId  String?     @map("entity_id")
+  details   String?
+  ipAddress String?     @map("ip_address")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model ZooSettings {
+  id          String   @id @default(uuid())
+  zooName     String   @default("WARRAN-CADDE ZOO") @map("zoo_name")
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  logo        String?
+  openingTime String?  @map("opening_time")
+  closingTime String?  @map("closing_time")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("zoo_settings")
+}
