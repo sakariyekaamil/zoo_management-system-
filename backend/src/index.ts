@@ -1,4 +1,4 @@
-import app from './createApp';
+import app from './app';
 import { config } from './config';
 import { ensureDatabaseConnection } from './config/prisma';
 import logger from './utils/logger';

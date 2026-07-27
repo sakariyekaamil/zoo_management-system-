@@ -2,17 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "api": {
-      "root": ".",
+      "root": "./",
       "framework": "express",
-      "entrypoint": "src/createApp.ts",
-      "buildCommand": "npx prisma generate",
-      "functions": {
-        "src/createApp.ts": {
-          "maxDuration": 30,
-          "memory": 1024,
-          "includeFiles": "node_modules/.prisma/client/**"
-        }
-      }
+      "entrypoint": "src/app.ts",
+      "buildCommand": "npx prisma generate"
     }
   },
   "rewrites": [

@@ -56,6 +56,14 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 
+app.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    message: 'WARRAN-CADDE Zoo API is running',
+    health: '/api/health',
+  });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'WARRAN-CADDE Zoo API is running' });
 });
