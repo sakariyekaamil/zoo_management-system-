@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config();
+
+// Do not override env vars already set by Vercel.
+dotenv.config({ override: false });
 
 const isVercel = Boolean(process.env.VERCEL);
 

@@ -4,12 +4,24 @@ import fs from 'fs';
 import { config } from '../config';
 
 const uploadPath = path.resolve(config.uploadDir);
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
+
+const ensureUploadDir = () => {
+  try {
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+  } catch {
+    // Ignore on read-only cold starts; uploads will fail later with a clear error.
+  }
+};
+
+ensureUploadDir();
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadPath),
+  destination: (_req, _file, cb) => {
+    ensureUploadDir();
+    cb(null, uploadPath);
+  },
   filename: (_req, file, cb) => {
     const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     cb(null, `${unique}${path.extname(file.originalname)}`);

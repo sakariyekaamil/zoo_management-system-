@@ -1,4 +1,4 @@
-import app from './app';
+import app from './createApp';
 import { config } from './config';
 import { ensureDatabaseConnection } from './config/prisma';
 import logger from './utils/logger';
@@ -18,9 +18,4 @@ const start = async () => {
   });
 };
 
-// Local / traditional hosting only — Vercel uses api/index.ts as the serverless entry.
-if (!process.env.VERCEL) {
-  start();
-}
-
-export default app;
+start();
