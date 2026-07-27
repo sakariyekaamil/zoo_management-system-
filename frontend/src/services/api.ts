@@ -1,7 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { ApiResponse } from '../types';
-
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+import { API_URL } from './url';
 
 const api = axios.create({
   baseURL: API_URL,

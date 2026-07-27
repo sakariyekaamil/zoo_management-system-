@@ -14,8 +14,9 @@ app.set('trust proxy', 1);
 
 const corsOrigins = [
   config.frontendUrl,
-  'http://127.0.0.1:5173',
+  'https://zoo-management-system-oh9g.vercel.app',
   'http://localhost:5173',
+  'http://localhost:5174'
 ].filter(Boolean);
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
