@@ -2,17 +2,18 @@
   "name": "warran-cadde-zoo-backend",
   "version": "1.0.0",
   "description": "WARRAN-CADDE Zoo Management System API",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "npx prisma generate && tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "postinstall": "npx prisma generate",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
-    "prisma:seed": "ts-node prisma/seed.ts",
-    "db:setup": "prisma generate && prisma db push && ts-node prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "db:setup": "npx prisma generate && prisma db push && tsx prisma/seed.ts"
   },
   "keywords": [
     "zoo",
@@ -43,11 +44,10 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.15",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   }
 }

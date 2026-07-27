@@ -4,7 +4,7 @@
     "api": {
       "root": "./",
       "framework": "express",
-      "entrypoint": "src/app.ts",
+      "entrypoint": "index.ts",
       "buildCommand": "npx prisma generate"
     }
   },
